@@ -1,6 +1,6 @@
 # Tabi 旅
 
-**A social networking platform for meaningful connection.** Tabi means journey in Japanese: a place to discover people through shared interests and hobbies rather than popularity.
+**A community for meaningful connection.** Tabi means journey in Japanese: a place to discover people through shared interests and hobbies rather than popularity.
 
 > A journey is not measured by the distance travelled, but by what is discovered along the way.
 
@@ -19,7 +19,7 @@ Full Stack Development Lab · JIIT Noida
 
 ## Architecture and data model
 
-This is a Django MVT application. The existing Python package is `tabi`; its Django app label remains `network` so the original custom user model (`network.User`) and migrations stay compatible. Existing posts, likes, follows, login, profiles, the Following route, and ten-item pagination are retained. Related models currently live in the same app to keep this incremental project easy to run and understand.
+This is a Django MVT application. The `tabi` package uses its established database migration label to preserve existing user records and migration history. Core accounts, posts, likes, follows, communities, messaging, and moderation are organized within the Tabi app. Existing login, profiles, the Following route, and ten-item pagination are retained.
 
 Core relationships: `User` has one `Profile` and optional `AnonymousProfile`; `Profile` selects many `Interest`s. `Post` belongs to a user and optionally a `Community`, with many `Hashtag`s; `Comment` and likes belong to posts. `CommunityMembership` joins users to communities with roles. `Conversation` has participant users and many `Message`s. `Notification` and `Report` reference users and relevant content. `Streak` is unique per user and interest.
 
@@ -42,7 +42,7 @@ python -m venv .venv
 # Windows: .venv\Scripts\activate
 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-python manage.py makemigrations network
+python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver

@@ -1,0 +1,15 @@
+{% extends "tabi/layout.html" %}
+{% block title %}Log in · Tabi{% endblock %}
+{% block body %}
+<section class="auth-shell">
+    <div class="auth-intro"><span class="auth-mark">&#x65C5;</span><p class="eyebrow">WELCOME BACK</p><h1>Continue your journey.</h1><p>Pick up where curiosity left you.</p></div>
+    <form action="{% url 'login' %}" method="post" class="form-card auth-card">
+        {% csrf_token %}<h2>Log in to Tabi</h2>
+        {% if message %}<div class="form-alert" role="alert">{{ message }}</div>{% endif %}
+        <div class="form-field"><label for="username">Username</label><input id="username" autofocus autocomplete="username" class="form-control" type="text" name="username" required></div>
+        <div class="form-field"><label for="password">Password</label><input id="password" autocomplete="current-password" class="form-control" type="password" name="password" required></div>
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+        <p class="auth-switch">New to Tabi? <a href="{% url 'register' %}">Create an account</a></p>
+    </form>
+</section>
+{% endblock %}

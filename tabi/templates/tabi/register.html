@@ -1,0 +1,17 @@
+{% extends "tabi/layout.html" %}
+{% block title %}Join Tabi{% endblock %}
+{% block body %}
+<section class="auth-shell">
+    <div class="auth-intro"><span class="auth-mark">&#x65C5;</span><p class="eyebrow">BEGIN SOMEWHERE</p><h1>Meet through what moves you.</h1><p>Build a profile around the things you love exploring.</p></div>
+    <form action="{% url 'register' %}" method="post" class="form-card auth-card">
+        {% csrf_token %}<h2>Create your account</h2>
+        {% if message %}<div class="form-alert" role="alert">{{ message }}</div>{% endif %}
+        <div class="form-field"><label for="username">Username</label><input id="username" class="form-control" autocomplete="username" autofocus type="text" name="username" minlength="3" maxlength="150" required></div>
+        <div class="form-field"><label for="email">Email address</label><input id="email" class="form-control" autocomplete="email" type="email" name="email" required></div>
+        <div class="form-field"><label for="password">Password</label><input id="password" class="form-control" autocomplete="new-password" type="password" name="password" required></div>
+        <div class="form-field"><label for="confirmation">Confirm password</label><input id="confirmation" class="form-control" autocomplete="new-password" type="password" name="confirmation" required></div>
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+        <p class="auth-switch">Already here? <a href="{% url 'login' %}">Log in</a></p>
+    </form>
+</section>
+{% endblock %}

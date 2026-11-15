@@ -1,0 +1,28 @@
+{% extends "tabi/layout.html" %}
+{% block title %}Edit profile · Tabi{% endblock %}
+{% block body %}
+<section class="page-heading"><p class="eyebrow">YOUR SPACE</p><h1>Edit your profile</h1><p>Share a little about what matters to you.</p></section>
+<form method="post" enctype="multipart/form-data" class="form-card profile-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}<div class="form-field{% if field.name == 'interests' %} interest-picker{% endif %}">
+        {% if field.name == 'picture' %}<div class="profile-image-preview" id="profile-image-preview">{% if form.instance.picture %}<img src="{{ form.instance.picture.url }}" alt="Current profile photo">{% else %}<span>{{ user.username|first|upper }}</span>{% endif %}</div>{% endif %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    <div class="form-actions"><a class="btn btn-light" href="{% url 'profile' user.id %}">Cancel</a><button class="btn btn-primary" type="submit">Save profile</button></div>
+</form>
+<script>
+document.getElementById("id_picture")?.addEventListener("change", function () {
+    const file = this.files?.[0];
+    const preview = document.getElementById("profile-image-preview");
+    if (!file || !preview) return;
+    if (preview.dataset.previewUrl) URL.revokeObjectURL(preview.dataset.previewUrl);
+    const url = URL.createObjectURL(file);
+    preview.dataset.previewUrl = url;
+    preview.innerHTML = "";
+    const image = document.createElement("img");
+    image.src = url;
+    image.alt = "Profile photo preview";
+    preview.appendChild(image);
+});
+</script>
+{% endblock %}

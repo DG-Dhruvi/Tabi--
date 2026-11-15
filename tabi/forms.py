@@ -4,6 +4,13 @@ from .models import Profile, Interest, Post, Comment, Community
 
 class ProfileForm(forms.ModelForm):
     interests = forms.ModelMultipleChoiceField(queryset=Interest.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
+    custom_interests = forms.CharField(
+        required=False,
+        max_length=400,
+        label="Add your own interests",
+        help_text="Separate interests with commas, for example: Hiking, Baking, Film photography.",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Add interests, separated by commas"}),
+    )
     class Meta:
         model = Profile
         fields = ["bio", "picture", "location", "interests"]
@@ -14,6 +21,13 @@ class ProfileForm(forms.ModelForm):
         if image and image.content_type not in ("image/jpeg", "image/png", "image/webp"):
             raise forms.ValidationError("Use a JPG, PNG, or WebP image.")
         return image
+
+    def clean_custom_interests(self):
+        value = self.cleaned_data["custom_interests"]
+        for name in (part.strip() for part in value.split(",")):
+            if name and (len(name) > 60 or not slugify(name)):
+                raise forms.ValidationError("Each interest must be 60 characters or fewer and include a letter or number.")
+        return value
 
 class PostForm(forms.ModelForm):
     class Meta:
