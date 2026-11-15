@@ -48,11 +48,11 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/`. Use the superuser credentials you created for admin moderation. No demo credentials are committed; create a local account via Register or create a superuser. The `seed_demo_data` command can populate non-credential demo content after migrations.
+Open `http://127.0.0.1:8000/`. Use the superuser credentials you created for admin moderation. To create demo content, run `python manage.py seed_demo_data`; it creates `demo_mika`, `demo_ren`, and `demo_aki`, each with password `TabiDemo2026!`. Change or delete these sample accounts before any public deployment.
 
 ## Feed ranking
 
-The current lightweight implementation matches post hashtags against the signed-in user's declared interests and sorts matching posts ahead of other recent posts. Every item includes a “Why you're seeing this” explanation. Likes and follower counts are not ranking signals. This first pass uses direct tag matching; TF-IDF/cosine similarity and recency weighting remain a future refinement.
+The feed builds a user-interest document from declared interests and text from liked/commented posts, then uses scikit-learn TF-IDF vectors and cosine similarity against candidate post text and hashtags. It combines similarity (0.65), seven-day recency decay (0.20), and a followed-author/community membership boost (0.15). Each card gives a short explanation. Likes and follower counts are not ranking signals. The model is intentionally lightweight and content-based.
 
 ## Limitations
 
