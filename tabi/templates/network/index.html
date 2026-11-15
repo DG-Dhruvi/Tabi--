@@ -1,0 +1,110 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h1>All Posts <small class="muted">A space for meaningful connection</small></h1>
+
+    {% if user.is_authenticated %}
+
+        <div class="new-post">
+            <h3>New Post</h3>
+
+            <form action="{% url 'newPost' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <textarea name="content" rows="4" maxlength="500" class="form-control" required placeholder="What have you been discovering lately?"></textarea>
+                <label class="mt-2"><input type="checkbox" name="is_anonymous"> Post as anonymous</label>
+                <p class="privacy-note">Anonymous posts hide your identity from other members. Admins can trace posts for moderation.</p>
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
+
+                <div class="row">
+                    <input type="submit" value="Post" class="btn btn-primary">
+                </div>
+            </form>
+        </div>
+
+    {% endif %}
+
+
+    <div class="all-post">
+
+        {% for post in posts_of_the_page %}
+
+            <div class="row post" id="post-{{ post.id }}">
+
+                <h5 class="username">
+                    {% if post.is_anonymous %}{{ post.user.anonymous_profile.display_name|default:"Anonymous member" }}{% else %}<a href="{% url 'profile' post.user.id %}">@{{ post.user }}</a>{% endif %}
+                </h5>
+
+                <h6 class="content">
+                    {{ post.content }}
+                </h6>
+                <div class="tags">{% for tag in post.hashtags.all %}<a href="{% url 'hashtag' tag.name %}">#{{ tag.name }}</a> {% endfor %}</div>
+                {% if post.image %}<img class="post-image" src="{{ post.image.url }}" alt="Image attached to post">{% endif %}
+
+                <p class="date">
+                    {{ post.date }}
+                </p>
+
+                <p>
+                    Likes:
+                    <span class="like-count">
+                        {{ post.likes.count }}
+                    </span>
+                </p>
+
+                {% if user.is_authenticated %}
+
+                    <button
+                        class="like-button ml-auto"
+                        data-post-id="{{ post.id }}"
+                        data-url="{% url 'like' post.id %}"
+                    >
+                        {% if user in post.likes.all %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+                    <form class="comment-form" data-url="{% url 'comment' post.id %}">{% csrf_token %}<input name="content" maxlength="500" placeholder="Add a thoughtful comment" required><button type="submit">Comment</button></form>
+                    <div class="comments">{% for comment in post.comments.all %}<p>{% if comment.is_anonymous %}Anonymous member{% else %}@{{ comment.user }}{% endif %}: {{ comment.content }} {% if user.is_authenticated %}<form class="report-form" data-url="{% url 'report_comment' comment.id %}">{% csrf_token %}<input name="reason" maxlength="300" placeholder="Report reason"><button type="submit">Report</button></form>{% endif %}</p>{% endfor %}</div>
+                    <form class="report-form" data-url="{% url 'report_post' post.id %}">{% csrf_token %}<input name="reason" maxlength="300" placeholder="Report reason"><button type="submit">Report</button></form>
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <nav aria-label="Page navigation example">
+
+        <ul class="pagination d-flex justify-content-center">
+
+            {% if posts_of_the_page.has_previous %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?page={{ posts_of_the_page.previous_page_number }}"
+                    >
+                        Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if posts_of_the_page.has_next %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?page={{ posts_of_the_page.next_page_number }}"
+                    >
+                        Next
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+{% endblock %}

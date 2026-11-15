@@ -1,0 +1,45 @@
+from django import forms
+from django.utils.text import slugify
+from .models import Profile, Interest, Post, Comment, Community
+
+class ProfileForm(forms.ModelForm):
+    interests = forms.ModelMultipleChoiceField(queryset=Interest.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
+    class Meta:
+        model = Profile
+        fields = ["bio", "picture", "location", "interests"]
+    def clean_picture(self):
+        image = self.cleaned_data.get("picture")
+        if image and image.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Image must be 5 MB or smaller.")
+        if image and image.content_type not in ("image/jpeg", "image/png", "image/webp"):
+            raise forms.ValidationError("Use a JPG, PNG, or WebP image.")
+        return image
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ["content", "image"]
+    def clean_content(self):
+        value = self.cleaned_data["content"].strip()
+        if not value: raise forms.ValidationError("Write something before posting.")
+        return value
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image and image.size > 5 * 1024 * 1024: raise forms.ValidationError("Image must be 5 MB or smaller.")
+        if image and image.content_type not in ("image/jpeg", "image/png", "image/webp"): raise forms.ValidationError("Use a JPG, PNG, or WebP image.")
+        return image
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["content"]
+    def clean_content(self): return self.cleaned_data["content"].strip()
+
+class CommunityForm(forms.ModelForm):
+    class Meta:
+        model = Community
+        fields = ["name", "slug", "description", "interests"]
+        widgets = {"interests": forms.CheckboxSelectMultiple}
+    def clean_slug(self):
+        slug = slugify(self.cleaned_data["slug"] or self.cleaned_data.get("name", ""))
+        return slug

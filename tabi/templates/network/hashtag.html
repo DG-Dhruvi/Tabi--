@@ -1,0 +1,1 @@
+{% extends "network/layout.html" %}{% block body %}<h1>#{{ tag.name }}</h1>{% for post in posts_of_the_page %}<article class="post">{% if post.is_anonymous %}Anonymous member{% else %}@{{ post.user }}{% endif %}<p>{{ post.content }}</p><small>{{ post.date }}</small></article>{% empty %}<p>No posts with this hashtag yet.</p>{% endfor %}{% endblock %}

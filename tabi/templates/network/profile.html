@@ -1,0 +1,162 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+    <h1 class='d-flex justify-content-center'>
+        Helloo!! {{ username }}
+    </h1>
+    <div class="profile-card">
+        {% if profile.picture %}<img class="profile-image" src="{{ profile.picture.url }}" alt="Profile image">{% endif %}
+        <p>{{ profile.bio }}</p><p>{{ profile.location }}</p>
+        <p>Interests: {% for interest in profile.interests.all %}<span class="badge badge-light">{{ interest.name }}</span> {% empty %}Add interests to find people who share them.{% endfor %}</p>
+        {% if user == user_profile %}<a href="{% url 'edit_profile' %}" class="btn btn-outline-success">Edit profile</a>{% endif %}
+        {% if suggestions %}<h5>People with shared interests</h5>{% for person in suggestions %}<a href="{% url 'profile' person.id %}">@{{ person.username }}</a> {% endfor %}{% endif %}
+    </div>
+
+    <div class='container'>
+        <div class='row d-flex justify-content-center'>
+
+            <h4 class='col-4'>
+                Followers: {{ followers.count }}
+            </h4>
+
+            <h4 class='col-4'>
+                Following: {{ following.count }}
+            </h4>
+
+            {% if user.is_authenticated %}
+                {% if user != user_profile %}
+                    <form action="{% url 'send_friend_request' user_profile.id %}" method="post">{% csrf_token %}<button class="btn btn-outline-success">Add friend</button></form>
+                    <form action="{% url 'block_user' user_profile.id %}" method="post">{% csrf_token %}<button class="btn btn-outline-secondary">Block</button></form>
+                    <form class="report-form" data-url="{% url 'report_user' user_profile.id %}">{% csrf_token %}<input name="reason" maxlength="300" placeholder="Reason to report this account"><button type="submit">Report user</button></form>
+
+                    {% if is_following %}
+
+                        <form action="{% url 'unfollow' %}" method="post">
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="userunfollow"
+                                value="{{ user_profile }}"
+                            />
+
+                            <input
+                                type="submit"
+                                value="Unfollow"
+                            />
+                        </form>
+
+                    {% else %}
+
+                        <form action="{% url 'follow' %}" method="post">
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="userfollow"
+                                value="{{ user_profile }}"
+                            />
+
+                            <input
+                                type="submit"
+                                value="Follow"
+                            />
+                        </form>
+
+                    {% endif %}
+
+                {% endif %}
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <div class="all-post">
+
+        {% for post in posts_of_the_page %}
+
+            <div class="row post" id="post-{{ post.id }}">
+
+                <h6 class="post-content">
+                    {{ post.content }}
+                </h6>
+                {% if post.is_anonymous %}<span class="badge badge-light">Anonymous member</span>{% endif %}
+
+                <p class="date">
+                    {{ post.date }}
+                </p>
+
+                <p>
+                    Likes:
+                    <span class="like-count">
+                        {{ post.likes.count }}
+                    </span>
+                </p>
+
+                {% if user.is_authenticated %}
+
+                    <button
+                        class="like-button ml-auto"
+                        data-post-id="{{ post.id }}"
+                        data-url="{% url 'like' post.id %}"
+                    >
+                        {% if user in post.likes.all %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+
+                {% endif %}
+                
+                {% if user == post.user %}
+
+                    <button class="edit-button" data-post-id="{{ post.id }}">Edit</button>
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <nav aria-label="Page navigation example">
+
+        <ul class="pagination d-flex justify-content-center">
+
+            {% if posts_of_the_page.has_previous %}
+
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?page={{ posts_of_the_page.previous_page_number }}"
+                    >
+                        Previous
+                    </a>
+                </li>
+
+            {% endif %}
+
+
+            {% if posts_of_the_page.has_next %}
+
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?page={{ posts_of_the_page.next_page_number }}"
+                    >
+                        Next
+                    </a>
+                </li>
+
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+{% endblock %}
