@@ -66,3 +66,16 @@ The feed builds a user-interest document from declared interests and text from l
 ## Privacy and ethics
 
 Anonymous posting hides identity from other members, but authorized staff can trace it during moderation. Users should not include personal details in anonymous content. Tabi avoids popularity-based feed ranking and urgency messaging. Review the in-app [Privacy & Ethics page](/privacy).
+
+## Run with Docker
+
+Install Docker Desktop (or Docker Engine with the Compose plugin), copy `.env.example` to `.env`, and set a long random `DJANGO_SECRET_KEY`. For example, generate one with `python -c "import secrets; print(secrets.token_urlsafe(50))"`.
+
+```sh
+docker compose up --build -d
+docker compose exec web python manage.py createsuperuser
+```
+
+Open `http://localhost:8000/`. Compose applies database migrations when the web container starts. SQLite data and uploaded media persist in the `tabi_data` volume. To stop the app, run `docker compose down`; to stop it and permanently delete its persisted data, run `docker compose down -v`.
+
+For deployment, set `DJANGO_ALLOWED_HOSTS` to the public host name and `DJANGO_CSRF_TRUSTED_ORIGINS` to the full HTTPS origin (for example, `https://tabi.example.com`). Set `PORT` if the host requires a different port. Keep `DJANGO_DEBUG=False` and store `.env` securely; do not commit secrets. Put the container behind a TLS terminating reverse proxy for public use. The default SQLite setup is intended for a single app instance; use managed PostgreSQL and suitable media storage for a scaled or higher availability deployment.
