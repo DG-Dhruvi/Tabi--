@@ -4,7 +4,6 @@
 
 > A journey is not measured by the distance travelled, but by what is discovered along the way.
 
-Full Stack Development Lab · JIIT Noida
 
 ## Features
 
