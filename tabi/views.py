@@ -278,11 +278,13 @@ def communities(request):
             community = form.save(commit=False); community.created_by = request.user
             if Community.objects.filter(slug=community.slug).exists(): form.add_error("slug", "That community URL is already used.")
             else:
-                community.save(); form.save_m2m(); CommunityMembership.objects.create(community=community, user=request.user, role="owner"); return redirect("community", slug=community.slug)
+                community.save(); form.save_m2m(); CommunityMembership.objects.create(community=community, user=request.user, role="owner")
+                flash_messages.success(request, "Your community has been created.")
+                return redirect("community", slug=community.slug)
     memberships = CommunityMembership.objects.filter(user=request.user).select_related("community").prefetch_related("community__interests")
     joined_ids = memberships.values_list("community_id", flat=True)
     hosted = Community.objects.filter(created_by=request.user).prefetch_related("interests").order_by("name")
-    joined = memberships.exclude(role="owner").order_by("community__name")
+    joined = memberships.order_by("community__name")
     available = Community.objects.exclude(pk__in=joined_ids).exclude(created_by=request.user).prefetch_related("interests").order_by("name")
     return render(request, "tabi/communities.html", {"joined_spaces": joined, "hosted_spaces": hosted, "available_cards": _community_cards(available), "form": form})
 

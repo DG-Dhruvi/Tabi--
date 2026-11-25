@@ -168,6 +168,18 @@ class TabiCoreTests(TestCase):
         self.assertContains(community_page, "A photo walk")
         self.assertContains(community_page, "@alice")
 
+    def test_create_community_without_slug_and_list_it_in_your_spaces(self):
+        self.client.force_login(self.alice)
+        created = self.client.post(reverse("communities"), {
+            "name": "Morning Walks", "slug": "", "description": "A gentle start to the day.",
+        })
+        community = Community.objects.get(name="Morning Walks")
+        self.assertEqual(community.slug, "morning-walks")
+        self.assertRedirects(created, reverse("community", args=[community.slug]))
+        self.assertTrue(CommunityMembership.objects.filter(community=community, user=self.alice, role="owner").exists())
+        page = self.client.get(reverse("communities"))
+        self.assertContains(page, "Morning Walks")
+
     def test_explore_following_and_html_search_render(self):
         self.client.force_login(self.alice)
         self.assertEqual(self.client.get(reverse("index")).status_code, 200)

@@ -50,10 +50,13 @@ class CommentForm(forms.ModelForm):
     def clean_content(self): return self.cleaned_data["content"].strip()
 
 class CommunityForm(forms.ModelForm):
+    slug = forms.SlugField(required=False, help_text="Optional. Leave blank to make one from the community name.")
     class Meta:
         model = Community
         fields = ["name", "slug", "description", "interests"]
         widgets = {"interests": forms.CheckboxSelectMultiple}
     def clean_slug(self):
         slug = slugify(self.cleaned_data["slug"] or self.cleaned_data.get("name", ""))
+        if not slug:
+            raise forms.ValidationError("Enter a name that can be used for the community address.")
         return slug

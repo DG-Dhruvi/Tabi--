@@ -75,6 +75,6 @@ docker compose up --build -d
 docker compose exec web python manage.py createsuperuser
 ```
 
-Open `http://localhost:8000/`. Compose applies database migrations when the web container starts. SQLite data and uploaded media persist in the `tabi_data` volume. To stop the app, run `docker compose down`; to stop it and permanently delete its persisted data, run `docker compose down -v`.
+Open `http://localhost:8000/`. Nginx serves `/media/` from the shared persistent volume and proxies app requests to Django. On startup, the `media-init` service copies any existing files from the local `media/` folder into that volume without overwriting files already there; new uploads persist in the same volume. Compose applies database migrations when the web container starts. SQLite data and uploaded media persist in `tabi_data`. To stop the app, run `docker compose down`; to stop it and permanently delete its persisted data, run `docker compose down -v`.
 
 For deployment, set `DJANGO_ALLOWED_HOSTS` to the public host name and `DJANGO_CSRF_TRUSTED_ORIGINS` to the full HTTPS origin (for example, `https://tabi.example.com`). Set `PORT` if the host requires a different port. Keep `DJANGO_DEBUG=False` and store `.env` securely; do not commit secrets. Put the container behind a TLS terminating reverse proxy for public use. The default SQLite setup is intended for a single app instance; use managed PostgreSQL and suitable media storage for a scaled or higher availability deployment.

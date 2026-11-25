@@ -1,8 +1,23 @@
 services:
+  media-init:
+    image: alpine:3.22
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        find /legacy-media -type f | while IFS= read -r source; do
+          relative=$${source#/legacy-media/}
+          target=/data/media/$${relative}
+          mkdir -p "$$(dirname "$${target}")"
+          if [ ! -e "$${target}" ]; then cp "$${source}" "$${target}"; fi
+        done
+    volumes:
+      - ./media:/legacy-media:ro
+      - tabi_data:/data
+    restart: "no"
+
   web:
     build: .
-    ports:
-      - "${PORT:-8000}:8000"
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
@@ -12,6 +27,20 @@ services:
       DJANGO_MEDIA_ROOT: /data/media
     volumes:
       - tabi_data:/data
+    depends_on:
+      media-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "${PORT:-8000}:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - tabi_data:/data:ro
+    depends_on:
+      - web
     restart: unless-stopped
 
 volumes:
